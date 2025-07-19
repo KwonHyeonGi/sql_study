@@ -1,1 +1,22 @@
+SQL 연습
+CREATE TABLE, INSERT, SELECT, WHERE 문 복습 완료
 
+-- CREATE TABLE 테이블명 (칼럼1, 칼럼2, 칼럼3);
+ 칼럼 뒤는 어떠한 형식으로 넣을지 입력 ex) text, integer, primary key
+** primary key 는 같은 번호가 존재 불가(1은 하나뿐), null 불가, 자동 index
+
+-- INSERT INTO 테이블 명 (칼럼1, 칼럼2, 칼럼3) VALUES (값1, 값2, 값3);
+
+-- SELECT 
+  테이블의 모든 컬럼 조회: SELECT * FROM 테이블이름;
+
+  특정 컬럼만 선택 조회: SELECT 컬럼1, 컬럼2 FROM 테이블이름;
+
+  컬럼에 별칭 부여: SELECT 컬럼 AS "새로운 이름" FROM 테이블이름;
+    select 컬럼 as "새로운 이름" -> 조회 시 컬럼의 이름이 "새로운 이름"으로 바꿔어서 보여짐
+** 내가 헷갈렸던게 from 테이블이름 을 하지않았다는 점
+
+-- WHERE
+  비교 연산자
+= : 같다, > : 크다, < : 작다, >= : 크거나 같다, <= : 작거나 같다, <> 또는 != : 같지 않다
+  SELECT * FROM 테이블명 WHERE 칼럼 = 30;
