@@ -1,0 +1,56 @@
+## 07.23 sql 학습
+## JOIN : 두 개이상의 테이블에서 관련된 칼럼을 기준으로 합쳐서 보게해줌
+    select
+      employees.mployees_name
+      departments.departments_name
+    from
+      employess
+    inner
+      departments
+    on
+      departments.department_id = employess.empolyees_id;
+
+      -> employess와 department의 이름을 조회할하는데, employees, department에서 찾습니다.
+          department_id랑 employess_id가 같은 경우를 기준으로 보여줍니다! 
+            id중 null값이 있으면 조회안됩니다
+
+## LEFT JOIN : from 에서 먼저 쓴 테이블은 다 보여주고, 그 이후에 join한 테이블은 공통 데이터가 있을경우 보여줌
+    select 
+        e.employess.name
+        d.department.name
+    from
+        employess as e
+    join inner
+        department as d
+    on 
+        e.employess.id = d.department.id;
+
+
+      -> join만 썼을 경우 department가 아직 null 데이터는 조회가 되지않았지만,
+          join inner를 통해서 department가 null이라도 emplouess의 데이터와 공통된 부분이 잇어 null이 표시되며 조회됨
+
+
+## 윈도우 함수(window function)
+  rank() over (partition by order by)
+  : 순위를 매겨줌
+
+      SELECT
+          e.employee_name,
+          d.department_name,
+          e.salary,
+          RANK() OVER (PARTITION BY d.department_name ORDER BY e.salary DESC) AS department_rank
+    FROM
+          employees AS e
+    INNER JOIN
+          departments AS d ON e.department_id = d.department_id;
+
+      salary(급여)로 순위를 매길건데,
+      partition by = 그룹화 할 칼럼
+      order by = 정렬화 할 칼럼
+      
+      말그대로 부서이름으로 그룹화 해서 급여별로 정렬했다.
+
+
+    rank() over (partition by order by)
+    다양한 윈도우 함수에서 rank()가 아닌 다른게 오면서 사용할 수 있음.
+    
