@@ -1,0 +1,102 @@
+## 07.24 sql 학습
+## where 절 서브 쿼리
+  예시: 평균 연봉보다 많이 받는 직원 찾기
+
+      select 
+          employees_name
+          salary
+      from
+          employees
+      where 
+          salary > avg(salary); 
+      -> 이렇게 하면 실패 왜냐면 쿼리는 한번에 한번밖에 실행 되지않기에.
+       
+       수정본
+         select 
+              employees_name
+              salary
+          from
+              employees
+          where 
+              salary > (select 
+                          avg(salary)
+                        from
+                          employees); 
+
+## FROM 절 서브쿼리 (인라인 뷰)
+  예시: 각 부서별 평균 연봉을 구하고, 그 평균 연봉이 5500 이상인 부서만 보기
+    select
+      T.department_name
+      T.avg_salary
+    from
+            (select 
+                d.department_name,
+                avg(e.salary) as avg_salary
+            from
+                employees as e
+            join
+                department as d
+            on
+                e.department_id = d.department_id 
+            group by 
+                d.department_name) as T
+    where
+      T.avg_salary >= 5500;
+
+우선 첫 번째 문제 : 각 부서별 평균 연봉을 구한다.
+                      구한 값을 T라는 테이블로 임시로 만들고
+    두번째 문제 : 그 평균 연봉이 5500이상인 부서 찾기.
+                이기에 부서이름과 평균 급여를 조회, T테이블(부서별 평균 연봉)에서, 조건(where)로 5500 이상을 조회 하도록.
+
+  
+## SELECT 절 서브쿼리 (스칼라 서브쿼리)
+    예시: 각 직원 정보와 함께, 회사 전체의 평균 연봉을 나란히 보기
+
+    select
+        employees_name,
+        salary,
+          (select
+            avg(salary)
+          from
+            employees)
+    from 
+        employees;
+
+## 복합 쿼리 문제
+문제: 각 부서에서 가장 높은 연봉을 받는 직원의 이름, 연봉, 부서명을 찾아보세요.
+
+        SELECT
+        	e.employee_name,
+        	max(e.salary),
+        	d.department_name
+        FROM
+        	employees as e
+        inner JOIN
+        	departments as d
+        on
+        	e.department_id = d.department_id 
+        GROUP by department_name;
+
+이런 식으로 조회를 해봤지만 결정적으로 모든 부서가 조회되지않았다.
+
+정답 : 
+        SELECT
+          e.employee_name,
+          e.salary,
+          d.department_name
+      FROM
+          employees AS e
+          
+      INNER JOIN
+          departments AS d ON e.department_id = d.department_id
+          
+      INNER JOIN
+          (SELECT department_id, MAX(salary) AS max_salary
+           FROM employees
+           GROUP BY department_id) AS max_sal_table
+      ON
+          e.department_id = max_sal_table.department_id
+          AND e.salary = max_sal_table.max_salary;     
+
+결론적으로 보자면
+  또 하나의 inner join을 통해서 부서, max(salary)를 통해서 부서별 가장 높은 연봉을 받는 사람의 테이블을 만들었어야했다. 
