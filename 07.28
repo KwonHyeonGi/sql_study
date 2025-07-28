@@ -1,0 +1,66 @@
+## 07.28 sql 학습
+## SQL 학습: 윈도우 함수 심화 (LAG, LEAD)
+
+   LAG() over() : lag에서 선언한 칼럼의 이전 값을 가져오는 것
+   ex) lag(amount, 1, 0) over(partition by 칼럼 order by 칼럼)
+         -> amount라는 칼럼에서의 값을 가져오는데, 기본 값의 하나 전(1) 값을 가져온다. 하나전(1)의 값이 없을 경우 0으로 선언한다(안적으면 null이 됨)
+
+    실습  : 각 제품 별로 날짜 순으로 정렬하여, 현재 판매량과 이전 날짜의 판매량 조회
+    select product, 
+           sale_date, 
+           amount,
+           lag( amount , 1, 0) over (partition by product order by sale_date)
+    from sales
+    order by product, sale_date;
+          
+    LEAD() over() : lead에서 선언한 칼럼의 다음 값을 가져옴
+
+    lag와 동일한 방식
+
+    실습 : 각 제품별로 날짜 순으로 정렬하여, 현재 판매량과 다음 날짜의 판매량을 함께 조회
+    select product,
+           sale_date,
+           amount,
+           lead(amount, 1, 0) over (partition by product order by sale_date)
+    from sales
+    order by product, sale_date;
+
+    
+## SQL 심화 윈도우 함수/CTE 관련 문제 풀이
+
+문제 1: 각 제품별 전일 대비 판매량 변화율 계산
+
+목표: sales 테이블을 사용하여 각 제품별로 전일 대비 판매량의 변화율을 계산하세요. (변화율 = (오늘 판매량 - 어제 판매량) / 어제 판매량 * 100)
+
+select product,
+       sale_date,
+       amount,
+       lag(amount, 1, 0) over(partition by product order by sale_date),
+       (amount - lag(amount, 1, 0) over (partition by product order by sale_date)) * 100 / lag(amount, 1, 1) over (partition by product order by sale_date)
+from sales
+order by product, sale_date;
+
+-> 틀린점(?), lag를 할때 null 대신 0값이 나오게해서 분모가 0이되서 결과값이 null과 0이 보임, 그렇기에 0이아닌 1로 바꿔줌
+
+
+
+문제 2: 각 도시에서 가장 나이가 많은 사용자 찾기 (CTE와 윈도우 함수 활용)
+
+목표: users 테이블을 사용하여 각 도시(city)에서 가장 나이가 많은 사용자(들)의 정보를 조회하세요. (동점자 모두 포함)
+
+with bestAge as(
+                id, 
+                name,
+                age,
+                city,
+                rank() over(partition by city order by age desc)
+      from users
+                )
+select id
+       city, 
+       name, 
+       age
+from users 
+where age_rank = 1;
+
+-> 가장 나이 많은 순이기에 desc 해야했던 점.
