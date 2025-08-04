@@ -1,0 +1,35 @@
+## 08.04 sql 학습
+
+문제 1: 일일 총 판매액 조회
+목표: orders 테이블을 사용하여 날짜(order_date)별로 총 판매액(price * quantity)을 계산하는 쿼리를 작성하세요.
+
+select 
+  order_date, 
+  sum(price*quantity) over (PARTITION by order_date) as '총 판매액' 
+FROM orders GROUP by order_date;
+
+으로 했더니 판매액이 다 더해지지않았다. 이유는  sum(price*quantity) over (PARTITION by order_date) as '총 판매액' 
+판매액을 parttition by order_date 로 파티션을 나눴다 그니까 order_date로 다시한번 그룹화를 했기에  전체 판매액이 안나온거임
+
+정답은
+select
+  order_date,
+  sum(price*quantity)
+from orders groub by order_date order by order_date;
+
+문제 2: 가장 많이 팔린 상품 3개 조회
+목표: orders 테이블을 사용하여 판매 수량(quantity) 기준으로 가장 많이 팔린 상위 3개의 상품(product_name)과 총 판매 수량을 조회하세요.
+
+select
+  product_name, 
+  quantity 
+from orders group by product_name order by quantity desc limit 3;
+
+으로 했더니 판매수량순으로 나오긴했지만, 원하는건 총 판매수량 기준으로 조회하기다.
+
+select
+  product_name,
+  sum(quantity)
+from orders group by product_name order by sum(quantity) desc limit 3; 
+으로 총 판매기준으로 조회하면 정답.
+
